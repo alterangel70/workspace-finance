@@ -10,6 +10,23 @@ args:
   invoice_number:
 
 steps:
+  # Step 0: verify the Xero connection is valid before doing any work.
+  # Exits immediately with a clear message if the token is expired or missing,
+  # instead of failing obscurely inside fetch_xero with "curl failed".
+  - id: check_xero_connection
+    run: |
+      source /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/config.env
+      result=$(curl -sf \
+        -H "Authorization: Bearer ${M365_XERO_API_KEY}" \
+        "${M365_XERO_BASE_URL}/v1/connections/xero-default/status" \
+        || { echo "ERROR: could not reach proxy at ${M365_XERO_BASE_URL} — is the integration service running?" >&2; exit 1; })
+      status=$(echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))")
+      if [ "$status" != "valid" ]; then
+        echo "ERROR: Xero connection xero-default is '${status}' — re-authorise before retrying. Run: curl -s -H 'Authorization: Bearer \$M365_XERO_API_KEY' '\$M365_XERO_BASE_URL/v1/oauth/xero/authorize?connection_id=xero-default'" >&2
+        exit 1
+      fi
+      echo "$result"
+
   # Step 1: read extraction.json + vendor memory, write workflow_inputs.json to
   # disk (so combine_context.py can access it later alongside xero data).
   - id: read_inputs
@@ -28,16 +45,17 @@ steps:
     stdin: $fetch_xero.stdout
     command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/combine_context.py --case-dir "${case_dir}"
 
-  # Step 4: llm-task — evaluate vendor memory and build the complete xero-payload.
-  # Receives the full context (extraction + vendor_memory + xero_data) via stdin.
-  # Schema enforces all required Xero fields. No ContactID/AccountCode/TaxType
-  # is ever invented — the model must select only from values present in the input.
+  # Step 4: call llm-task via HTTP, passing the combined context as `input`.
+  # Using a command: script instead of run: openclaw.invoke because the Lobster
+  # pipeline openclaw.invoke command drains and discards stdin before calling the
+  # API, so the LLM would receive INPUT_JSON: null. The script reads stdin and
+  # includes it as the `input` field in the API args.
   - id: build_payload
     stdin: $combine_context.stdout
     env:
       OPENCLAW_URL: "http://127.0.0.1:18789"
-    pipeline: |-
-      llm_task.invoke --args-json '{"prompt":"You receive a JSON object with three fields: extraction (all invoice data), vendor_memory (historical supplier data, may be {}), and xero_data (contacts, accounts, tax_rates from Xero). Build a complete Xero ACCPAY draft invoice payload. Rules: (1) Type must be the string ACCPAY. (2) Contact.ContactID: if vendor_memory.contactId is a non-null non-empty string use it exactly; otherwise find the best contact in xero_data.contacts by name similarity to extraction.supplier_name and use that ContactID. Never invent a ContactID. (3) AccountCode for each line item: if vendor_memory.accountCodes has entries suitable for the line item type prefer those codes; otherwise pick the most relevant account from xero_data.accounts. Never invent an AccountCode. (4) TaxType: if vendor_memory.taxTypes has suitable entries prefer those; otherwise pick from xero_data.tax_rates. Use empty string if no tax applies to a line item. (5) Date must be a YYYY-MM-DD string from extraction. DueDate must be a YYYY-MM-DD string if present in extraction, or null if not found. (6) Amounts and quantities must be numbers. (7) CurrencyCode must be the ISO 4217 code from extraction. (8) Reference must equal the invoice number from extraction if present. (9) Do not invent any ID, code, or type not present in the input data.","thinking":"low","schema":{"type":"object","properties":{"Type":{"type":"string"},"Contact":{"type":"object","properties":{"ContactID":{"type":"string"}},"required":["ContactID"],"additionalProperties":false},"Date":{"type":"string"},"DueDate":{"type":["string","null"]},"InvoiceNumber":{"type":"string"},"Reference":{"type":"string"},"CurrencyCode":{"type":"string"},"LineItems":{"type":"array","items":{"type":"object","properties":{"Description":{"type":"string"},"Quantity":{"type":"number"},"UnitAmount":{"type":"number"},"AccountCode":{"type":"string"},"TaxType":{"type":"string"}},"required":["Description","Quantity","UnitAmount","AccountCode"],"additionalProperties":false},"minItems":1}},"required":["Type","Contact","Date","CurrencyCode","LineItems"],"additionalProperties":false}}'
+      OPENCLAW_TOKEN: "c2c9574f01b26bb4a69e99a3f86860d004ca665cc07a8845"
+    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/build_xero_payload.py
 
   # Step 5: save the llm-task output to case_dir/xero-payload.json.
   - id: save_payload

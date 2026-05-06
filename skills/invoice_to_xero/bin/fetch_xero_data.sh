@@ -43,14 +43,26 @@ TAX_RATES_URL="${M365_XERO_BASE_URL}/v1/xero/tax-rates?connection_id=${ENCODED_C
 
 AUTH_HEADER="Authorization: Bearer ${M365_XERO_API_KEY}"
 
-contacts_json="$(curl -sf -H "$AUTH_HEADER" "$CONTACTS_URL" \
-  || { echo "curl failed: /v1/xero/contacts" >&2; exit 1; })"
+_raw_contacts="$(curl -s -w "\n%{http_code}" -H "$AUTH_HEADER" "$CONTACTS_URL")"
+_code_contacts="$(echo "$_raw_contacts" | tail -1)"
+contacts_json="$(echo "$_raw_contacts" | head -n -1)"
+if [[ "$_code_contacts" -lt 200 || "$_code_contacts" -ge 300 ]]; then
+  echo "ERROR: /v1/xero/contacts returned HTTP ${_code_contacts}: ${contacts_json}" >&2; exit 1
+fi
 
-accounts_json="$(curl -sf -H "$AUTH_HEADER" "$ACCOUNTS_URL" \
-  || { echo "curl failed: /v1/xero/accounts" >&2; exit 1; })"
+_raw_accounts="$(curl -s -w "\n%{http_code}" -H "$AUTH_HEADER" "$ACCOUNTS_URL")"
+_code_accounts="$(echo "$_raw_accounts" | tail -1)"
+accounts_json="$(echo "$_raw_accounts" | head -n -1)"
+if [[ "$_code_accounts" -lt 200 || "$_code_accounts" -ge 300 ]]; then
+  echo "ERROR: /v1/xero/accounts returned HTTP ${_code_accounts}: ${accounts_json}" >&2; exit 1
+fi
 
-tax_rates_json="$(curl -sf -H "$AUTH_HEADER" "$TAX_RATES_URL" \
-  || { echo "curl failed: /v1/xero/tax-rates" >&2; exit 1; })"
+_raw_tax_rates="$(curl -s -w "\n%{http_code}" -H "$AUTH_HEADER" "$TAX_RATES_URL")"
+_code_tax_rates="$(echo "$_raw_tax_rates" | tail -1)"
+tax_rates_json="$(echo "$_raw_tax_rates" | head -n -1)"
+if [[ "$_code_tax_rates" -lt 200 || "$_code_tax_rates" -ge 300 ]]; then
+  echo "ERROR: /v1/xero/tax-rates returned HTTP ${_code_tax_rates}: ${tax_rates_json}" >&2; exit 1
+fi
 
 python3 - "$contacts_json" "$accounts_json" "$tax_rates_json" <<'PYEOF'
 import json, sys

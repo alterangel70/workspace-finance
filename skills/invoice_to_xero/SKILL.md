@@ -101,9 +101,15 @@ Replace `<case_dir>`, `<supplier_name>`, `<supplier_slug>`, and `<invoice_number
 
 ## Handling the approval gate
 
-When Lobster returns `needs_approval`:
-1. Show the user the approval summary (it is embedded in the `requiresApproval` field)
-2. Ask the user to confirm or deny
+⛔ **STOP. When Lobster returns `needs_approval`, do NOT call lobster again. Do NOT read extraction.json again. Do NOT do anything else.**
+
+The only permitted actions at this point are:
+
+1. Read `<case_dir>/approval-preview.txt` — display its full contents verbatim in the chat, exactly as-is.
+2. Ask the user: "Approve this invoice? (yes / no)"
+3. Wait for the user's reply in the current session.
+4. Delete `<case_dir>/approval-preview.txt`.
+5. Call lobster with `resume` and the `resumeToken` received above.
 
 If the user confirms:
 ```json
@@ -114,6 +120,10 @@ If the user denies:
 ```json
 { "action": "resume", "token": "<resumeToken>", "approve": false }
 ```
+
+**If you already have a `resumeToken` from a previous lobster call in this session**: do not call lobster with `run` again. Use the existing `resumeToken` to resume.
+
+**If `approval-preview.txt` does not exist**: display the contents of `<case_dir>/xero-payload.json` as a fallback summary instead.
 
 ## Hard stops
 
@@ -128,10 +138,16 @@ Do not silently retry financial write operations.
 
 ## Errors
 
-If Lobster reports a step failure:
-- say which step failed (Lobster reports the step id)
-- say the exact error
-- stop
+Classify the failure before responding:
 
-Do not silently retry financial write operations.
+| Category | Examples | What to do |
+|---|---|---|
+| **Recoverable (auto-retry once)** | `llm-task` timeout or transient HTTP 5xx from proxy | Retry the Lobster call once silently. If it fails again, escalate as below. |
+| **Requires user action** | `check_xero_connection` fails with `expired`/`missing` · `validate` step rejects payload · contact not found in Xero · approval denied by user | Stop immediately. Report the exact error. Explain what the user must do to unblock (e.g. re-authorise Xero, fix the invoice data, or correct the contact). |
+| **Hard stop — do not retry** | `supplier_name` missing from `extraction.json` · `invoice_number` missing · `extraction.json` unreadable · `read_inputs` exits non-zero | Stop. Report which field is missing and from which file. Do not attempt the Lobster call. |
+
+For all failures:
+- state which step failed (Lobster reports the step id)
+- quote the exact error message
+- do not silently retry financial write operations (step `create_draft` and beyond)
 

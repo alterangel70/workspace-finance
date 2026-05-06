@@ -8,6 +8,7 @@ later from disk — needed because Lobster steps can only pipe one stdin at a ti
 Also prints the same JSON to stdout (for any future chaining if needed).
 """
 import argparse
+import difflib
 import json
 import pathlib
 import sys
@@ -41,6 +42,18 @@ if vendor_file.exists():
         vendor_memory = json.loads(vendor_file.read_text())
     except json.JSONDecodeError:
         vendor_memory = {}  # corrupt file — treat as no memory
+
+if not vendor_memory and vendors_dir.exists():
+    # Exact slug not found — try fuzzy match against available vendor slugs
+    available_slugs = [p.stem for p in vendors_dir.glob('*.json')]
+    close = difflib.get_close_matches(args.supplier_slug, available_slugs, n=1, cutoff=0.85)
+    if close:
+        fuzzy_file = vendors_dir / f"{close[0]}.json"
+        print(f"INFO: no exact vendor match for '{args.supplier_slug}', using close match '{close[0]}'", file=sys.stderr)
+        try:
+            vendor_memory = json.loads(fuzzy_file.read_text())
+        except json.JSONDecodeError:
+            vendor_memory = {}
 
 output = {
     "extraction": extraction,

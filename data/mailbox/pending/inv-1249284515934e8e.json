@@ -1,0 +1,23 @@
+{
+  "id": "inv-1249284515934e8e",
+  "message_id": "<MRWPR01MB125769AE64762C865594C0B0DFE312@MRWPR01MB12576.eurprd01.prod.exchangelabs.com>",
+  "account": "zoho",
+  "mailbox": "INBOX",
+  "subject": "Fw: test Invoice",
+  "sender_address": "a.oraa@insinet.tech",
+  "sender_name": "Angel Oraa",
+  "date": "2026-05-04T14:39:18+00:00",
+  "body_summary": "Ganado Managment",
+  "attachment_info": [
+    {
+      "filename": "M00012428_PAID.pdf",
+      "content_type": "application/pdf",
+      "size": 197170,
+      "saved_path": "/home/ao/.openclaw/workspace-finance/data/mailbox/pending/inv-1249284515934e8e/attachments/M00012428_PAID.pdf"
+    }
+  ],
+  "status": "pending",
+  "scan_score": 3,
+  "created_at": "2026-05-04T16:54:41.760927+00:00",
+  "updated_at": "2026-05-04T16:54:41.760927+00:00"
+}

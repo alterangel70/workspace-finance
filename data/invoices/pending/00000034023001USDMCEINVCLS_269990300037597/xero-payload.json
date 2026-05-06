@@ -1,0 +1,20 @@
+{
+  "Type": "ACCPAY",
+  "Contact": {
+    "ContactID": "1596b824-cf89-4e7e-98c2-457138ae123f"
+  },
+  "Date": "1970-01-01",
+  "InvoiceNumber": "269990300037597",
+  "Reference": "269990300037597",
+  "CurrencyCode": "USD",
+  "LineAmountTypes": "Exclusive",
+  "LineItems": [
+    {
+      "Description": "Monthly Issuer Fraud and Loss Database Fee",
+      "Quantity": 1,
+      "UnitAmount": 125,
+      "AccountCode": "429",
+      "TaxType": "NONE"
+    }
+  ]
+}

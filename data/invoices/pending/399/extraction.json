@@ -1,0 +1,53 @@
+{
+  "invoice_number": "399",
+  "date": "31/12/2025",
+  "due_date": "14/02/2026",
+  "supplier_name": "RMC Wise Ltd",
+  "buyer_name": "Valetta Credit Finance Corporation",
+  "currency": "EUR",
+  "reference": {
+    "payment_instruction": "MT27026234"
+  },
+  "payment_details": {
+    "bank_name": "Bank of Valletta (BOV), Malta",
+    "account_number": "500 112 095 07",
+    "swift": "VALLMTMT",
+    "iban": "MT36VALL22013000000050011209507",
+    "payment_instructions_text": "RMC Wise Ltd - MT27026234 D3, Avenue77, Triq in-Negozju, Zone 3, Central Business District, Birkirkara, CBD 3010, Malta"
+  },
+  "line_items": [
+    {
+      "description": "Risk Manager Engagement October - December 2025",
+      "quantity": null,
+      "unit_price": null,
+      "amount_excluding_tax": null,
+      "vat_rate": "18%",
+      "vat_amount": null,
+      "amount": 6750.0
+    },
+    {
+      "description": "Risk Manager Engagement Extra Hours Q4 2025 - 14 hours at EUR 150",
+      "quantity": 14,
+      "unit_price": 150.0,
+      "amount_excluding_tax": null,
+      "vat_rate": "18%",
+      "vat_amount": null,
+      "amount": 2100.0
+    }
+  ],
+  "taxes": [
+    {
+      "name": "VAT",
+      "rate": "18%",
+      "base_amount": 8850.0,
+      "tax_amount": 1593.0
+    }
+  ],
+  "totals": {
+    "subtotal": 8850.0,
+    "vat_total": 1593.0,
+    "total": 10443.0,
+    "paid": 0.0,
+    "balance_due": 10443.0
+  }
+}

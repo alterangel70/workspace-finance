@@ -31,21 +31,35 @@ if [[ -z "$IDEMPOTENCY_KEY" ]]; then
   IDEMPOTENCY_KEY="$(python3 -c 'import uuid; print(uuid.uuid4())')"
 fi
 
-PAYLOAD="$(python3 -c "
+PAYLOAD="$(python3 - "$JSON_FILE" << 'PYEOF'
 import json, sys, datetime
 
 data = json.load(open(sys.argv[1]))
 
-contact_id    = data['Contact']['ContactID']
-currency_code = data.get('CurrencyCode', 'EUR')
+# --- Required fields ---
+contact_id = data.get('Contact', {}).get('ContactID', '')
+if not contact_id:
+    print("ERROR: Contact.ContactID is missing in xero-payload.json", file=sys.stderr)
+    sys.exit(1)
 
-# DueDate: use invoice DueDate, fall back to Date, fall back to today+30d
+currency_code = data.get('CurrencyCode') or 'EUR'
+
 due_date = data.get('DueDate') or data.get('Date')
 if not due_date:
     due_date = (datetime.date.today() + datetime.timedelta(days=30)).isoformat()
 
+# --- Line items: full explicit mapping, no silent drops ---
+raw_items = data.get('LineItems', [])
+if not raw_items:
+    print("ERROR: LineItems is empty in xero-payload.json", file=sys.stderr)
+    sys.exit(1)
+
 line_items = []
-for li in data.get('LineItems', []):
+for i, li in enumerate(raw_items):
+    for field in ('Description', 'Quantity', 'UnitAmount', 'AccountCode'):
+        if li.get(field) is None:
+            print(f"ERROR: LineItems[{i}].{field} is missing", file=sys.stderr)
+            sys.exit(1)
     item = {
         'description':  li['Description'],
         'quantity':     li['Quantity'],
@@ -56,8 +70,7 @@ for li in data.get('LineItems', []):
         item['tax_type'] = li['TaxType']
     line_items.append(item)
 
-date = data.get('Date')
-
+# --- Assemble proxy payload ---
 payload = {
     'connection_id': 'xero-default',
     'contact_id':    contact_id,
@@ -65,15 +78,18 @@ payload = {
     'due_date':      due_date,
     'currency_code': currency_code,
 }
-if date:
-    payload['date'] = date
+
+date_val = data.get('Date')
+if date_val:
+    payload['date'] = date_val
 
 ref = data.get('Reference') or data.get('InvoiceNumber')
 if ref:
     payload['reference'] = ref
 
 print(json.dumps(payload))
-" "$JSON_FILE")"
+PYEOF
+)"
 
 echo "PAYLOAD:" >&2
 echo "$PAYLOAD" >&2

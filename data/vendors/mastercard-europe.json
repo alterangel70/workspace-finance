@@ -1,0 +1,22 @@
+{
+  "slug": "mastercard-europe",
+  "name": "Mastercard Europe SA",
+  "contactId": "1596b824-cf89-4e7e-98c2-457138ae123f",
+  "currency": "USD",
+  "usageCount": 1,
+  "lastUsed": "2026-05-06",
+  "accountCodes": [
+    {
+      "code": "429",
+      "description": "Other Issuing Services",
+      "useCount": 1
+    }
+  ],
+  "taxTypes": [
+    {
+      "type": "NONE",
+      "name": "NONE",
+      "useCount": 1
+    }
+  ]
+}

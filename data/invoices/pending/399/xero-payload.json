@@ -1,0 +1,28 @@
+{
+  "Type": "ACCPAY",
+  "Contact": {
+    "ContactID": "b8313467-4538-45e1-a944-b63f9507bc9c"
+  },
+  "Date": "2025-12-31",
+  "DueDate": "2026-02-14",
+  "InvoiceNumber": "399",
+  "Reference": "399",
+  "CurrencyCode": "EUR",
+  "LineAmountTypes": "Exclusive",
+  "LineItems": [
+    {
+      "Description": "Risk Manager Engagement October - December 2025",
+      "Quantity": 1,
+      "UnitAmount": 6750,
+      "AccountCode": "412",
+      "TaxType": "TAX002"
+    },
+    {
+      "Description": "Risk Manager Engagement Extra Hours Q4 2025 - 14 hours at EUR 150",
+      "Quantity": 14,
+      "UnitAmount": 150,
+      "AccountCode": "412",
+      "TaxType": "TAX002"
+    }
+  ]
+}

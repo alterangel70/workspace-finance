@@ -1,0 +1,23 @@
+{
+  "id": "inv-95adb4b3a15088fc",
+  "message_id": "<MRWPR01MB125764545423DAB5F87EDED6CFE3F2@MRWPR01MB12576.eurprd01.prod.exchangelabs.com>",
+  "account": "zoho",
+  "mailbox": "INBOX",
+  "subject": "Fw: test invoice",
+  "sender_address": "a.oraa@insinet.tech",
+  "sender_name": "Angel Oraa",
+  "date": "2026-05-06T09:34:33+00:00",
+  "body_summary": "Test body",
+  "attachment_info": [
+    {
+      "filename": "00000034023001USDMCEINVCLS_269990300037597.pdf",
+      "content_type": "application/pdf",
+      "size": 28423,
+      "saved_path": "/home/ao/.openclaw/workspace-finance/data/mailbox/pending/inv-95adb4b3a15088fc/attachments/00000034023001USDMCEINVCLS_269990300037597.pdf"
+    }
+  ],
+  "status": "pending",
+  "scan_score": 3,
+  "created_at": "2026-05-06T09:35:11.003088+00:00",
+  "updated_at": "2026-05-06T09:35:11.003088+00:00"
+}

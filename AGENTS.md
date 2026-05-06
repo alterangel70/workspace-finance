@@ -118,4 +118,36 @@ For any request about email, inbox, mailbox, attachments, or reading emails:
 - use the `claw-mail` skill first and is mandatory to read `SKILL.md`, if the user request is related to email functions.
 - never use ACP or any external runtime for email tasks
 - assume account `zoho` and mailbox `INBOX` unless the user says otherwise
-- if the user 
+
+---
+
+## Mailbox Invoice Watch
+
+This section defines permanent standing orders for the automated invoice mailbox scan.
+All detailed workflow steps live in `skills/mailbox_invoice_watch/SKILL.md`.
+
+### What is permitted without asking
+
+- Running the mailbox scan (`scan_invoice_mailbox.lobster`) is **always permitted**.
+  It is a read-only operation: it reads email metadata and persists candidates locally.
+  No external system is modified by the scan.
+
+### Silence rule
+
+- If the scan produces **zero new candidates**, do **not** send any message.
+  Reply `HEARTBEAT_OK` and stop.
+  Do not say "nothing found", "scan complete", or anything similar.
+
+### Notification rule
+
+- If the scan produces **one or more new candidates**, report them in the current session.
+  Summarise each candidate: subject, sender, date, attachment names.
+  Then ask the user explicitly whether to proceed with invoice extraction.
+
+### Approval gate — mandatory
+
+- **Never run invoice extraction (`invoice_to_xero` skill) without explicit approval.**
+  Explicit approval means the user says something unambiguous in this session
+  (e.g. "yes", "go ahead", "process them", or confirms a specific candidate by ID or subject).
+- A prior heartbeat that surfaced candidates does **not** count as approval.
+- When in doubt, ask. Do not proceed.

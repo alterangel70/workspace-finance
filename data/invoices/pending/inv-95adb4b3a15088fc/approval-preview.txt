@@ -1,0 +1,12 @@
+Supplier: Mastercard Europe SA
+Invoice #: 269990300037597
+Date: 2026-03-01
+Due date: —
+Currency: USD
+Line items:
+- Other Issuing Services (line)
+  Net: — USD • Account: 429 • Tax: NONE
+
+Subtotal (net): 125.00
+Tax: —
+Total: 125.00

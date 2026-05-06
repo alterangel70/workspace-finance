@@ -1,0 +1,22 @@
+{
+  "slug": "rmc-wise-ltd",
+  "name": "RMC Wise Ltd",
+  "contactId": "b8313467-4538-45e1-a944-b63f9507bc9c",
+  "currency": "EUR",
+  "usageCount": 2,
+  "lastUsed": "2026-05-04",
+  "accountCodes": [
+    {
+      "code": "412",
+      "description": "Consulting & Accounting",
+      "useCount": 3
+    }
+  ],
+  "taxTypes": [
+    {
+      "type": "TAX002",
+      "name": "VAT",
+      "useCount": 2
+    }
+  ]
+}

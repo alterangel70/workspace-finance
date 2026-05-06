@@ -1,0 +1,23 @@
+{
+  "id": "inv-f13acabd8e371c9d",
+  "message_id": "<MRWPR01MB125760A802FF45FA428B0AC48FE2A2@MRWPR01MB12576.eurprd01.prod.exchangelabs.com>",
+  "account": "zoho",
+  "mailbox": "INBOX",
+  "subject": "Fw: Pending Invoices - Camilleri Preziosi",
+  "sender_address": "a.oraa@insinet.tech",
+  "sender_name": "Angel Oraa",
+  "date": "2026-04-23T08:10:34+00:00",
+  "body_summary": "From: Katya Spiteri <katya.spiteri@camilleripreziosi.com<mailto:katya.spiteri@camilleripreziosi.com>>\r\nSent: 27 January 2026 11:54\r\nTo: Lacer Tenizo <lacer.tenizo@vcfc.eu<mailto:lacer.tenizo@vcfc.eu>>; Kristina Rapa Manch\u00e9 <kristina.rapa@camilleripreziosi.com<mailto:kristina.rapa@camilleripreziosi.com>>\r\nCc: Dominic Micallef <dominic.micallef@vcfc.eu<mailto:dominic.micallef@vcfc.eu>>; Finance ICL <finance@vcfc.eu<mailto:finance@vcfc.eu>>; Account Payables <ap@vcfc.eu<mailto:ap@vcfc.eu>>\r\nSubject",
+  "attachment_info": [
+    {
+      "filename": "ARInvoice INV CPA-SI00008511.pdf",
+      "content_type": "application/pdf",
+      "size": 66502,
+      "saved_path": "/home/ao/.openclaw/workspace-finance/data/mailbox/pending/inv-f13acabd8e371c9d/attachments/ARInvoice INV CPA-SI00008511.pdf"
+    }
+  ],
+  "status": "pending",
+  "scan_score": 3,
+  "created_at": "2026-05-04T16:54:41.751548+00:00",
+  "updated_at": "2026-05-04T16:54:41.751548+00:00"
+}

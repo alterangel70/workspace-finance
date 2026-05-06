@@ -120,10 +120,19 @@ for desc, qty, unit, account, tax, ex_li in li_summaries:
         f" • Account: {account} • Tax: {tax_label}"
     )
 
-amounts_block = ex.get('amounts', {})
-subtotal_net = amounts_block.get('amount_excluding_vat') or amounts_block.get('subtotal')
-vat_total = amounts_block.get('vat_amount') or amounts_block.get('vat_total')
-total = amounts_block.get('invoice_total') or amounts_block.get('total')
+# Calculate totals from the payload line items — these are the exact numbers
+# going to Xero, independent of whatever the extraction JSON contains.
+subtotal_net = sum(
+    li.get('UnitAmount', 0) * li.get('Quantity', 1)
+    for li in line_items
+    if isinstance(li.get('UnitAmount'), (int, float))
+)
+vat_total = sum(
+    li.get('TaxAmount', 0)
+    for li in line_items
+    if isinstance(li.get('TaxAmount'), (int, float))
+)
+total = subtotal_net + vat_total
 
 # User-facing approval preview (JSON-wrapped so Lobster output[] is machine-readable)
 summary = (
@@ -133,9 +142,9 @@ summary = (
     f"Due date: {due_date_ex or '—'}\n"
     f"Currency: {currency_ex or '—'}\n"
     f"Line items:\n" + "\n".join(line_items_text) + "\n\n"
-    f"Subtotal (net): {('%.2f' % subtotal_net) if isinstance(subtotal_net,(int,float)) else '—'}\n"
-    f"Tax: {('%.2f' % vat_total) if isinstance(vat_total,(int,float)) else '—'}\n"
-    f"Total: {('%.2f' % total) if isinstance(total,(int,float)) else '—'}"
+    f"Subtotal (net): {'%.2f' % subtotal_net} {currency_ex}\n"
+    f"Tax: {'%.2f' % vat_total} {currency_ex}\n"
+    f"Total: {'%.2f' % total} {currency_ex}"
 )
 
 print(json.dumps({"ok": True, "preview": summary}))

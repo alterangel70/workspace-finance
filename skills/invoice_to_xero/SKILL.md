@@ -70,6 +70,8 @@ Use the invoice number as `<case-id>` if available, otherwise derive one from th
 **Step 4.** Extract the invoice using the built-in `pdf` tool with this prompt:
 
 > You are an invoice data extractor. Extract ALL visible invoice fields as JSON: invoice number, date, due date, supplier name, buyer name, line items, amounts, taxes, totals, currency, IBAN, and reference. Return ONLY valid JSON.
+> 
+> The SUPPLIER is the external vendor who issued this invoice — the party we are paying. The BUYER is the company receiving the invoice (our own company). Never set supplier_name to our own company name (Valletta Credit Finance Corporation Limited or any variant).
 
 Save the result to `<case_dir>/extraction.json`.
 
@@ -77,6 +79,7 @@ Hard-stop here if:
 - extraction fails
 - `extraction.json` cannot be written
 - `supplier_name` is missing from the extracted data
+- `supplier_name` matches our own company name or a known variant ("Valletta Credit Finance Corporation Limited", "Valletta Credit Finance", "VCF", "Valletta Credit Finance Corp") — this means buyer and supplier were swapped; ask the user to confirm the correct supplier before proceeding
 
 ## Lobster handoff (step 5)
 

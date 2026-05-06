@@ -41,6 +41,15 @@ Add whatever helps you do your job. This is your cheat sheet.
 
 ---
 
+## Company Identity
+
+- **Our company name**: Valletta Credit Finance Corporation Limited
+- On any invoice we receive, **we are always the buyer/client — never the supplier**.
+- If an extracted invoice has `supplier_name` matching our company name (or a close variant), the extraction is wrong — stop and ask the user to clarify which party is the supplier.
+- Known name variants to treat as our own company: "Valletta Credit Finance", "VCF", "Valletta Credit Finance Corp"
+
+---
+
 ## Email
 
 - Default account: zoho

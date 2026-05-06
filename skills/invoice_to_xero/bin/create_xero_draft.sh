@@ -56,6 +56,8 @@ for li in data.get('LineItems', []):
         item['tax_type'] = li['TaxType']
     line_items.append(item)
 
+date = data.get('Date')
+
 payload = {
     'connection_id': 'xero-default',
     'contact_id':    contact_id,
@@ -63,6 +65,8 @@ payload = {
     'due_date':      due_date,
     'currency_code': currency_code,
 }
+if date:
+    payload['date'] = date
 
 ref = data.get('Reference') or data.get('InvoiceNumber')
 if ref:

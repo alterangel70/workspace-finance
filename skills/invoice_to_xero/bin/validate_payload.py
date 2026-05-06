@@ -125,7 +125,7 @@ subtotal_net = amounts_block.get('amount_excluding_vat') or amounts_block.get('s
 vat_total = amounts_block.get('vat_amount') or amounts_block.get('vat_total')
 total = amounts_block.get('invoice_total') or amounts_block.get('total')
 
-# User-facing approval text (must match PMO's preferred format exactly)
+# User-facing approval preview (JSON-wrapped so Lobster output[] is machine-readable)
 summary = (
     f"Supplier: {supplier_name}\n"
     f"Invoice #: {invoice_number_ex}\n"
@@ -138,4 +138,4 @@ summary = (
     f"Total: {('%.2f' % total) if isinstance(total,(int,float)) else '—'}"
 )
 
-print(summary)
+print(json.dumps({"ok": True, "preview": summary}))

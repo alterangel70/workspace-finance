@@ -89,7 +89,28 @@ After saving `extraction.json`, build the `supplier-slug` from the supplier name
 - strip leading and trailing hyphens
 - example: `"Camilleri Preziosi Advocates"` → `"camilleri-preziosi-advocates"`
 
-Call the `lobster` tool — do not use Bash for this step:
+Call the `lobster` tool with the **prepare** workflow — do not use Bash for this step:
+
+```json
+{
+  "action": "run",
+  "pipeline": "/home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/invoice_to_xero_prepare.lobster",
+  "argsJson": "{\"case_dir\": \"<case_dir>\", \"supplier_name\": \"<supplier_name>\", \"supplier_slug\": \"<supplier_slug>\", \"invoice_number\": \"<invoice_number>\"}",
+  "timeoutMs": 60000
+}
+```
+
+Replace `<case_dir>`, `<supplier_name>`, `<supplier_slug>`, and `<invoice_number>` with the actual values from `extraction.json`. When the workflow returns `status: ok`, the last item in `output[]` contains `{"ok": true, "preview": "..."}` with the invoice preview.
+
+## Approval (step 6)
+
+⛔ **STOP after prepare returns. Do NOT call lobster again until the user replies.**
+
+1. Read `output[-1]["preview"]` from the prepare response — display it verbatim to the user.
+2. Ask: "Approve this invoice? (yes / no)"
+3. Wait for the user's reply in the current session.
+
+If the user confirms, call the `lobster` tool with the **submit** workflow using the same args:
 
 ```json
 {
@@ -100,32 +121,9 @@ Call the `lobster` tool — do not use Bash for this step:
 }
 ```
 
-Replace `<case_dir>`, `<supplier_name>`, `<supplier_slug>`, and `<invoice_number>` with the actual values from `extraction.json`. The workflow runs entirely inside the Lobster engine and will pause at an approval gate.
+If the user denies: do not call lobster. Inform the user the invoice was not submitted.
 
-## Handling the approval gate
-
-⛔ **STOP. When Lobster returns `needs_approval`, do NOT call lobster again. Do NOT read extraction.json again. Do NOT do anything else.**
-
-The only permitted actions at this point are:
-
-1. Display the contents of the `requiresApproval` field from the Lobster response verbatim in the chat.
-2. Ask the user: "Approve this invoice? (yes / no)"
-3. Wait for the user's reply in the current session.
-4. Call lobster with `resume` and the `resumeToken` received above.
-
-If the user confirms:
-```json
-{ "action": "resume", "token": "<resumeToken>", "approve": true }
-```
-
-If the user denies:
-```json
-{ "action": "resume", "token": "<resumeToken>", "approve": false }
-```
-
-**If you already have a `resumeToken` from a previous lobster call in this session**: do not call lobster with `run` again. Use the existing `resumeToken` to resume.
-
-**If `requiresApproval` is empty or missing**: display the contents of `<case_dir>/xero-payload.json` as a fallback summary instead.
+**If `output[-1]["preview"]` is missing or empty**: display the contents of `<case_dir>/xero-payload.json` as a fallback summary instead.
 
 ## Hard stops
 

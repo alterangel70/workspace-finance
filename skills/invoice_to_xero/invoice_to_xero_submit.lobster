@@ -1,8 +1,7 @@
 name: invoice_to_xero_submit
 
-# Args are passed via argsJson when invoking this workflow.
-# All four are required; the workflow will fail early if scripts cannot find
-# the expected files derived from these values.
+# Called by the agent after the user approves the invoice preview returned
+# by invoice_to_xero_prepare. All four args are required.
 args:
   case_dir:
   supplier_name:
@@ -10,76 +9,17 @@ args:
   invoice_number:
 
 steps:
-  # Step 0: verify the Xero connection is valid before doing any work.
-  # Exits immediately with a clear message if the token is expired or missing,
-  # instead of failing obscurely inside fetch_xero with "curl failed".
+  # Step 0: re-check Xero connection before writing anything to Xero.
+  # The prepare workflow may have run minutes or hours ago; the 30-min access
+  # token may have expired while the agent was waiting for user approval.
+  # This step auto-refreshes the token before create_draft runs.
   - id: check_xero_connection
     command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/check_xero_connection.sh xero-default
 
-  # Step 1: read extraction.json + vendor memory, write workflow_inputs.json to
-  # disk (so combine_context.py can access it later alongside xero data).
-  - id: read_inputs
-    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/read_workflow_inputs.py --case-dir "${case_dir}" --supplier-slug "${supplier_slug}"
-
-  # Step 2: fetch Xero contacts, accounts, and tax rates in one call.
-  # Always runs (GET, idempotent). llm-task decides which data to use.
-  - id: fetch_xero
-    command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/fetch_xero_data.sh --search "${supplier_name}"
-
-  # Step 3: merge workflow_inputs.json (disk) + xero data (stdin) into one
-  # context blob. This is the workaround for Lobster's single-stdin-per-step
-  # constraint: step 1 writes to disk, step 2 produces xero data, this step
-  # joins them both.
-  - id: combine_context
-    stdin: $fetch_xero.stdout
-    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/combine_context.py --case-dir "${case_dir}"
-
-  # Step 4: call llm-task via HTTP, passing the combined context as `input`.
-  # Using a command: script instead of run: openclaw.invoke because the Lobster
-  # pipeline openclaw.invoke command drains and discards stdin before calling the
-  # API, so the LLM would receive INPUT_JSON: null. The script reads stdin and
-  # includes it as the `input` field in the API args.
-  - id: build_payload
-    stdin: $combine_context.stdout
-    env:
-      OPENCLAW_URL: "http://127.0.0.1:18789"
-      OPENCLAW_TOKEN: "c2c9574f01b26bb4a69e99a3f86860d004ca665cc07a8845"
-    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/build_xero_payload.py
-
-  # Step 5: save the llm-task output to case_dir/xero-payload.json.
-  - id: save_payload
-    stdin: $build_payload.stdout
-    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/save_payload.py --case-dir "${case_dir}"
-
-  # Step 6: validate xero-payload.json deterministically.
-  # Exit 1 here hard-stops the workflow before the approval gate.
-  # stdout becomes the approval preview shown to the user.
-  - id: validate
-    command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/validate_payload.py --case-dir "${case_dir}"
-
-  # Step 7: approval gate — workflow pauses here.
-  # Lobster returns needs_approval + resumeToken.
-  # The agent relays the validate summary to the user and asks for confirmation.
-  # Resume with approve: true to proceed, approve: false to cancel.
-  - id: approve
-    stdin: $validate.stdout
-    command: cat
-    approval: required
-
-  # Step 8: re-check Xero connection after the approval gate.
-  # The approval gate can pause for minutes or hours; the 30-min access token
-  # may have expired by the time the user responds. This step auto-refreshes
-  # before create_draft so it never fails silently on an expired token.
-  - id: check_xero_post_approve
-    command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/check_xero_connection.sh xero-default
-    condition: $approve.approved
-
-  # Step 9: create the Xero DRAFT invoice. Only runs if approved.
+  # Step 1: create the Xero DRAFT invoice.
   - id: create_draft
     command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/create_xero_draft.sh --json-file "${case_dir}/xero-payload.json" --idempotency-key "${invoice_number}"
-    condition: $approve.approved
 
-  # Step 10: update vendor memory. Only runs if approved AND draft was created.
+  # Step 2: update vendor memory with any new contactId / accountCodes.
   - id: update_vendor_memory
     command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/update_vendor_memory.py --case-dir "${case_dir}" --supplier-slug "${supplier_slug}"
-    condition: $approve.approved

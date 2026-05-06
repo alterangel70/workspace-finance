@@ -108,11 +108,10 @@ Replace `<case_dir>`, `<supplier_name>`, `<supplier_slug>`, and `<invoice_number
 
 The only permitted actions at this point are:
 
-1. Read `<case_dir>/approval-preview.txt` — display its full contents verbatim in the chat, exactly as-is.
+1. Display the contents of the `requiresApproval` field from the Lobster response verbatim in the chat.
 2. Ask the user: "Approve this invoice? (yes / no)"
 3. Wait for the user's reply in the current session.
-4. Delete `<case_dir>/approval-preview.txt`.
-5. Call lobster with `resume` and the `resumeToken` received above.
+4. Call lobster with `resume` and the `resumeToken` received above.
 
 If the user confirms:
 ```json
@@ -126,7 +125,7 @@ If the user denies:
 
 **If you already have a `resumeToken` from a previous lobster call in this session**: do not call lobster with `run` again. Use the existing `resumeToken` to resume.
 
-**If `approval-preview.txt` does not exist**: display the contents of `<case_dir>/xero-payload.json` as a fallback summary instead.
+**If `requiresApproval` is empty or missing**: display the contents of `<case_dir>/xero-payload.json` as a fallback summary instead.
 
 ## Hard stops
 

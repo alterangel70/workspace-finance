@@ -66,12 +66,20 @@ steps:
     command: cat
     approval: required
 
-  # Step 8: create the Xero DRAFT invoice. Only runs if approved.
+  # Step 8: re-check Xero connection after the approval gate.
+  # The approval gate can pause for minutes or hours; the 30-min access token
+  # may have expired by the time the user responds. This step auto-refreshes
+  # before create_draft so it never fails silently on an expired token.
+  - id: check_xero_post_approve
+    command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/check_xero_connection.sh xero-default
+    condition: $approve.approved
+
+  # Step 9: create the Xero DRAFT invoice. Only runs if approved.
   - id: create_draft
     command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/create_xero_draft.sh --json-file "${case_dir}/xero-payload.json" --idempotency-key "${invoice_number}"
     condition: $approve.approved
 
-  # Step 9: update vendor memory. Only runs if approved AND draft was created.
+  # Step 10: update vendor memory. Only runs if approved AND draft was created.
   - id: update_vendor_memory
     command: python3 /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/update_vendor_memory.py --case-dir "${case_dir}" --supplier-slug "${supplier_slug}"
     condition: $approve.approved

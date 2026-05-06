@@ -1,0 +1,23 @@
+{
+  "id": "inv-7ad50b8be4fb0727",
+  "message_id": "<MRWPR01MB1257667406D6C2435B0F4D7C2FE3F2@MRWPR01MB12576.eurprd01.prod.exchangelabs.com>",
+  "account": "zoho",
+  "mailbox": "INBOX",
+  "subject": "Fw: Invoice",
+  "sender_address": "a.oraa@insinet.tech",
+  "sender_name": "Angel Oraa",
+  "date": "2026-05-06T14:26:28+00:00",
+  "body_summary": "asd",
+  "attachment_info": [
+    {
+      "filename": "3112_VCFC_399.pdf",
+      "content_type": "application/pdf",
+      "size": 42819,
+      "saved_path": "/home/ao/.openclaw/workspace-finance/data/mailbox/pending/inv-7ad50b8be4fb0727/attachments/3112_VCFC_399.pdf"
+    }
+  ],
+  "status": "pending",
+  "scan_score": 3,
+  "created_at": "2026-05-06T14:26:51.999407+00:00",
+  "updated_at": "2026-05-06T14:26:51.999407+00:00"
+}

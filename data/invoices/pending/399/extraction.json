@@ -1,15 +1,15 @@
 {
   "invoice_number": "399",
-  "date": "31/12/2025",
-  "due_date": "14/02/2026",
+  "date": "2025-12-31",
+  "due_date": "2026-02-14",
   "supplier_name": "RMC Wise Ltd",
-  "buyer_name": "Valetta Credit Finance Corporation",
+  "buyer_name": "Valletta Credit Finance Corporation",
   "currency": "EUR",
   "reference": {
-    "payment_instruction": "MT27026234"
+    "payment_instructions_reference": "MT27026234"
   },
-  "payment_details": {
-    "bank_name": "Bank of Valletta (BOV), Malta",
+  "bank_details": {
+    "bank_name": "Bank of Valletta (BOV)",
     "account_number": "500 112 095 07",
     "swift": "VALLMTMT",
     "iban": "MT36VALL22013000000050011209507",
@@ -20,34 +20,43 @@
       "description": "Risk Manager Engagement October - December 2025",
       "quantity": null,
       "unit_price": null,
-      "amount_excluding_tax": null,
-      "vat_rate": "18%",
-      "vat_amount": null,
-      "amount": 6750.0
+      "amount": 6750.0,
+      "tax": {
+        "type": "VAT",
+        "rate": 0.18,
+        "amount": null
+      },
+      "line_total": 6750.0,
+      "tax_included": false
     },
     {
       "description": "Risk Manager Engagement Extra Hours Q4 2025 - 14 hours at EUR 150",
       "quantity": 14,
       "unit_price": 150.0,
-      "amount_excluding_tax": null,
-      "vat_rate": "18%",
-      "vat_amount": null,
-      "amount": 2100.0
+      "amount": 2100.0,
+      "tax": {
+        "type": "VAT",
+        "rate": 0.18,
+        "amount": null
+      },
+      "line_total": 2100.0,
+      "tax_included": false
     }
   ],
-  "taxes": [
-    {
-      "name": "VAT",
-      "rate": "18%",
-      "base_amount": 8850.0,
-      "tax_amount": 1593.0
-    }
-  ],
-  "totals": {
+  "amounts": {
     "subtotal": 8850.0,
-    "vat_total": 1593.0,
+    "vat_rate": 0.18,
+    "vat_amount": 1593.0,
     "total": 10443.0,
     "paid": 0.0,
     "balance_due": 10443.0
-  }
+  },
+  "taxes": [
+    {
+      "type": "VAT",
+      "rate": 0.18,
+      "base_amount": 8850.0,
+      "amount": 1593.0
+    }
+  ]
 }

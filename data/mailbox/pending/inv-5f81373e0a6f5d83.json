@@ -1,0 +1,23 @@
+{
+  "id": "inv-5f81373e0a6f5d83",
+  "message_id": "<MRWPR01MB125765E00725D7C25BF6F080AFE3F2@MRWPR01MB12576.eurprd01.prod.exchangelabs.com>",
+  "account": "zoho",
+  "mailbox": "INBOX",
+  "subject": "Fw: test invoice",
+  "sender_address": "a.oraa@insinet.tech",
+  "sender_name": "Angel Oraa",
+  "date": "2026-05-06T13:52:28+00:00",
+  "body_summary": "eta",
+  "attachment_info": [
+    {
+      "filename": "ARInvoice INV CPA-SI00007839.pdf",
+      "content_type": "application/pdf",
+      "size": 66368,
+      "saved_path": "/home/ao/.openclaw/workspace-finance/data/mailbox/pending/inv-5f81373e0a6f5d83/attachments/ARInvoice INV CPA-SI00007839.pdf"
+    }
+  ],
+  "status": "pending",
+  "scan_score": 3,
+  "created_at": "2026-05-06T13:54:27.463463+00:00",
+  "updated_at": "2026-05-06T13:54:27.463463+00:00"
+}

@@ -38,8 +38,22 @@ except json.JSONDecodeError as e:
     print(f"ERROR: workflow_inputs.json is not valid JSON: {e}", file=sys.stderr)
     sys.exit(1)
 
-print(json.dumps({
+result = {
     "extraction": workflow_inputs["extraction"],
     "vendor_memory": workflow_inputs.get("vendor_memory", {}),
     "xero_data": xero_data,
-}))
+}
+
+# Save a {TaxType: rate_fraction} lookup to disk so validate_payload.py can
+# calculate approximate tax amounts for the approval preview without re-fetching.
+tax_rates_lookup = {}
+for tr in xero_data.get('tax_rates', []):
+    tax_type = tr.get('TaxType') or tr.get('tax_type')
+    # EffectiveRate is a percentage (e.g. 18.0 = 18%); handle both naming styles
+    rate = (tr.get('EffectiveRate') or tr.get('effective_rate')
+            or tr.get('DisplayTaxRate') or tr.get('display_tax_rate'))
+    if tax_type and isinstance(rate, (int, float)):
+        tax_rates_lookup[tax_type] = rate / 100.0
+(case_dir / 'xero-rates.json').write_text(json.dumps(tax_rates_lookup))
+
+print(json.dumps(result))

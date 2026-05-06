@@ -74,11 +74,20 @@ print(json.dumps(payload))
 echo "PAYLOAD:" >&2
 echo "$PAYLOAD" >&2
 
-curl -sf \
+TMPFILE="$(mktemp)"
+HTTP_STATUS="$(curl -s -o "$TMPFILE" -w "%{http_code}" \
   -X POST \
   -H "Authorization: Bearer ${M365_XERO_API_KEY}" \
   -H "Content-Type: application/json" \
   -H "Idempotency-Key: ${IDEMPOTENCY_KEY}" \
   -d "$PAYLOAD" \
-  "${M365_XERO_BASE_URL}/v1/xero/invoices" \
-  || { echo "curl failed (exit $?): request to /v1/xero/invoices failed" >&2; exit 1; }
+  "${M365_XERO_BASE_URL}/v1/xero/invoices")"
+RESPONSE_BODY="$(cat "$TMPFILE")"
+rm -f "$TMPFILE"
+
+if [[ "$HTTP_STATUS" -lt 200 || "$HTTP_STATUS" -ge 300 ]]; then
+  echo "ERROR: Xero API returned HTTP ${HTTP_STATUS}: ${RESPONSE_BODY}" >&2
+  exit 1
+fi
+
+echo "$RESPONSE_BODY"

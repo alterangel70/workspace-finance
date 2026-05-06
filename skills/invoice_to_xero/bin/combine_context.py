@@ -49,9 +49,16 @@ result = {
 tax_rates_lookup = {}
 for tr in xero_data.get('tax_rates', []):
     tax_type = tr.get('TaxType') or tr.get('tax_type')
-    # EffectiveRate is a percentage (e.g. 18.0 = 18%); handle both naming styles
-    rate = (tr.get('EffectiveRate') or tr.get('effective_rate')
-            or tr.get('DisplayTaxRate') or tr.get('display_tax_rate'))
+    # EffectiveRate is a percentage (e.g. 18.0 = 18%); handle both naming styles.
+    # Use explicit None-check to avoid dropping 0.0 as falsy.
+    rate = None
+    for _field in ('EffectiveRate', 'effective_rate', 'DisplayTaxRate', 'display_tax_rate'):
+        if tr.get(_field) is not None:
+            rate = tr[_field]
+            break
+    if rate is None:
+        components = tr.get('TaxComponents') or tr.get('tax_components') or []
+        rate = sum(c.get('Rate', 0) or c.get('rate', 0) for c in components)
     if tax_type and isinstance(rate, (int, float)):
         tax_rates_lookup[tax_type] = rate / 100.0
 (case_dir / 'xero-rates.json').write_text(json.dumps(tax_rates_lookup))

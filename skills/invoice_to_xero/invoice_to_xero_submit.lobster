@@ -14,18 +14,7 @@ steps:
   # Exits immediately with a clear message if the token is expired or missing,
   # instead of failing obscurely inside fetch_xero with "curl failed".
   - id: check_xero_connection
-    run: |
-      source /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/config.env
-      result=$(curl -sf \
-        -H "Authorization: Bearer ${M365_XERO_API_KEY}" \
-        "${M365_XERO_BASE_URL}/v1/connections/xero-default/status" \
-        || { echo "ERROR: could not reach proxy at ${M365_XERO_BASE_URL} — is the integration service running?" >&2; exit 1; })
-      status=$(echo "$result" | python3 -c "import sys,json; print(json.load(sys.stdin).get('status','unknown'))")
-      if [ "$status" != "valid" ]; then
-        echo "ERROR: Xero connection xero-default is '${status}' — re-authorise before retrying. Run: curl -s -H 'Authorization: Bearer \$M365_XERO_API_KEY' '\$M365_XERO_BASE_URL/v1/oauth/xero/authorize?connection_id=xero-default'" >&2
-        exit 1
-      fi
-      echo "$result"
+    command: bash /home/ao/.openclaw/workspace-finance/skills/invoice_to_xero/bin/check_xero_connection.sh xero-default
 
   # Step 1: read extraction.json + vendor memory, write workflow_inputs.json to
   # disk (so combine_context.py can access it later alongside xero data).
